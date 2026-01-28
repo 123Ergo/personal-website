@@ -23,12 +23,12 @@ export default function ChatTerminal() {
     const [orbMode, setOrbMode] = useState<OrbMode>("idle");
     const [input, setInput] = useState("");
 
-    const { messages, sendMessage, status } = useChat({
+    const { messages, sendMessage, status, error } = useChat({
         onFinish: () => {
             setOrbMode("idle");
         },
-        onError: (error) => {
-            console.error("Chat Error:", error);
+        onError: (err) => {
+            console.error("Chat Error:", err);
             setOrbMode("idle");
         },
     });
@@ -55,6 +55,8 @@ export default function ChatTerminal() {
             setOrbMode("thinking");
         } else if (isPlaying) {
             setOrbMode("speaking");
+        } else if (error) {
+            setOrbMode("idle");
         } else {
             setOrbMode("idle");
         }
@@ -63,7 +65,7 @@ export default function ChatTerminal() {
         if (!isLoading && orbMode === "thinking") {
             flush();
         }
-    }, [isLoading, isPlaying, orbMode, flush]);
+    }, [isLoading, isPlaying, orbMode, flush, error]);
 
     // Stream Text to Voice
     useEffect(() => {
@@ -98,7 +100,7 @@ export default function ChatTerminal() {
                     className="relative flex items-center gap-2 bg-black/80 backdrop-blur-xl border border-white/10 p-2 rounded-xl"
                 >
                     <div className="pl-3">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <div className={`w-2 h-2 rounded-full ${error ? 'bg-red-500' : 'bg-emerald-500 animate-pulse'}`} />
                     </div>
 
                     <input
@@ -106,7 +108,7 @@ export default function ChatTerminal() {
                         style={{ color: "white" }}
                         value={input}
                         onChange={handleInputChange}
-                        placeholder="Ask my Digital Twin..."
+                        placeholder={error ? "Connection lost. Try again?" : "Ask my Digital Twin..."}
                         autoFocus
                     />
 
@@ -122,6 +124,18 @@ export default function ChatTerminal() {
                         )}
                     </button>
                 </form>
+
+                {error && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute -top-10 left-0 right-0 text-center"
+                    >
+                        <span className="text-[10px] font-mono text-red-500/80 uppercase tracking-widest bg-red-500/5 px-3 py-1 rounded-full border border-red-500/10">
+                            Neural Link Interrupted — Please check your connection
+                        </span>
+                    </motion.div>
+                )}
             </div>
 
             {/* Transcript Area (Optional - fade out old messages) */}

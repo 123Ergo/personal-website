@@ -1,7 +1,7 @@
 'use server';
 
 import { generateObject } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { google } from '@ai-sdk/google';
 import { z } from 'zod';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -37,7 +37,7 @@ export async function matchJobDescription(formData: FormData) {
 
     // Generate determination using Vercel AI SDK
     const { object } = await generateObject({
-        model: openai('gpt-4o'),
+        model: google('gemini-2.0-flash'),
         schema: MatchSchema,
         system: 'You are the Erik Goldhar Credential Matcher. Using ONLY the provided knowledge base, determine if Erik is a fit for the uploaded Job Description. Be precise and conservative. Do NOT assume any skills or experiences not explicitly mentioned in the knowledge base.',
         prompt: `

@@ -35,12 +35,18 @@ export async function POST(req: Request) {
 
         try {
             const content = await fs.readFile(knowledgePath, 'utf-8');
-            const knowledge = JSON.parse(content);
-            fullContext = JSON.stringify(knowledge, null, 2);
-            console.log('JSON knowledge loaded successfully.');
+            if (content) {
+                const knowledge = JSON.parse(content);
+                fullContext = JSON.stringify(knowledge, null, 2);
+                console.log('JSON knowledge loaded successfully.');
+            } else {
+                throw new Error('Knowledge file is empty');
+            }
         } catch (error) {
-            console.error('Error reading JSON knowledge:', error);
-            fullContext = '(No structured knowledge available)';
+            console.error('Error reading/parsing JSON knowledge:', error);
+            // We can still proceed without custom knowledge, 
+            // the system prompt alone defines the base personality
+            fullContext = 'Information not available at this moment.';
         }
 
         console.log('Knowledge base context built. Length:', fullContext.length);
